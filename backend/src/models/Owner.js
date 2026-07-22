@@ -1,5 +1,6 @@
 const { DataTypes, Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
+const pg = require('pg');
 
 dotenv.config();
 
@@ -7,6 +8,7 @@ const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || proc
 const sequelize = global.__sgaSequelize || (databaseUrl
     ? new Sequelize(databaseUrl, {
         dialect: 'postgres',
+        dialectModule: pg,
         logging: false,
         dialectOptions: process.env.NODE_ENV === 'production' ? {
             ssl: {
@@ -18,6 +20,7 @@ const sequelize = global.__sgaSequelize || (databaseUrl
     : new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
         host: process.env.DB_HOST,
         dialect: 'postgres',
+        dialectModule: pg,
         logging: false,
     }));
 
