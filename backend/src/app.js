@@ -39,7 +39,15 @@ require('./models/Owner');
 
 
 // Importar rutas
-const loadRoute = (route) => route.default || route;
+const loadRoute = (route) => {
+    let loadedRoute = route;
+
+    while (loadedRoute && typeof loadedRoute !== 'function' && loadedRoute.default) {
+        loadedRoute = loadedRoute.default;
+    }
+
+    return loadedRoute;
+};
 const authRoutes = loadRoute(require('./routes/authRoutes'));
 const vehicleRoutes = loadRoute(require('./routes/vehicleRoutes'));
 const maintenanceRoutes = loadRoute(require('./routes/maintenanceRoutes'));
