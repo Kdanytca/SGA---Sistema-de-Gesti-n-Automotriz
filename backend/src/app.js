@@ -2,10 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const database = require('./config/database');
+const { sequelize } = require('./config/database');
 const seedDefaultUsers = require('./seeders/defaultUsers');
-
-const sequelize = database.sequelize || database.default?.sequelize || database.default || database;
 
 // Importar modelos
 require('./models/User');

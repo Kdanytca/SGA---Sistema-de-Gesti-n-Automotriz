@@ -37,6 +37,4 @@ const sequelize = databaseUrl
         }
     );
 
-module.exports = sequelize;
-module.exports.sequelize = sequelize;
-module.exports.default = sequelize;
+module.exports = { sequelize };
