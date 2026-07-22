@@ -39,4 +39,9 @@ const sequelize = global.__sgaSequelize || (databaseUrl
 
 global.__sgaSequelize = sequelize;
 
-module.exports = sequelize;
+module.exports = {
+    define: (...args) => sequelize.define(...args),
+    sync: (...args) => sequelize.sync(...args),
+    authenticate: (...args) => sequelize.authenticate(...args),
+    instance: sequelize,
+};
