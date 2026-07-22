@@ -74,7 +74,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos (uploads)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const uploadsMiddleware = express.static(path.join(__dirname, '../uploads'));
+if (typeof uploadsMiddleware === 'function') {
+    app.use('/uploads', uploadsMiddleware);
+}
 
 // Rutas
 app.use('/api/auth', authRoutes);
