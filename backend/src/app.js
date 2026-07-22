@@ -64,6 +64,14 @@ const documentRoutes = loadRoute(require('./routes/documentRoutes'));
 const userRoutes = loadRoute(require('./routes/userRoutes'));
 const ownerRoutes = loadRoute(require('./routes/ownerRoutes'));
 const auditRoutes = loadRoute(require('./routes/auditRoutes'));
+const authControllerModule = require('./controllers/authController');
+const validateModule = require('./middleware/validate');
+const authMiddlewareModule = require('./middleware/auth');
+const authSchemasModule = require('./schemas/authSchemas');
+const authController = authControllerModule.default || authControllerModule;
+const validate = validateModule.default || validateModule;
+const authMiddleware = authMiddlewareModule.default || authMiddlewareModule;
+const authSchemas = authSchemasModule.default || authSchemasModule;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -80,13 +88,25 @@ if (typeof uploadsMiddleware === 'function') {
 }
 
 // Rutas
-app.use('/api/auth', authRoutes);
-app.use('/api/vehicles', vehicleRoutes);
-app.use('/api/maintenances', maintenanceRoutes);
-app.use('/api/documents', documentRoutes);
-app.use('/api/usuarios', userRoutes);
-app.use('/api/owners', ownerRoutes);
-app.use('/api/audit', auditRoutes);
+app.post('/api/auth/register', validate(authSchemas.registerSchema), authController.register);
+app.post('/api/auth/login', validate(authSchemas.loginSchema), authController.login);
+app.get('/api/auth/profile', authMiddleware.auth, authController.getProfile);
+
+const registerRoute = (prefix, route) => {
+    if (typeof route === 'function') {
+        app.use(prefix, route);
+    } else {
+        console.warn(`Ruta ${prefix} omitida: handler inválido`);
+    }
+};
+
+registerRoute('/api/auth', authRoutes);
+registerRoute('/api/vehicles', vehicleRoutes);
+registerRoute('/api/maintenances', maintenanceRoutes);
+registerRoute('/api/documents', documentRoutes);
+registerRoute('/api/usuarios', userRoutes);
+registerRoute('/api/owners', ownerRoutes);
+registerRoute('/api/audit', auditRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
