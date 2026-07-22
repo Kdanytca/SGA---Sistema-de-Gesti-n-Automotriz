@@ -3,7 +3,7 @@ const database = require('../config/database');
 const Maintenance = require('./Maintenance');
 const User = require('./User');
 
-const sequelize = database.default || database;
+const sequelize = database.sequelize || database.default?.sequelize || database.default || database;
 
 const Document = sequelize.define('Document', {
     id: {

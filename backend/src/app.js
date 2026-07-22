@@ -5,7 +5,7 @@ const path = require('path');
 const database = require('./config/database');
 const seedDefaultUsers = require('./seeders/defaultUsers');
 
-const sequelize = database.default || database;
+const sequelize = database.sequelize || database.default?.sequelize || database.default || database;
 
 // Importar modelos
 require('./models/User');
