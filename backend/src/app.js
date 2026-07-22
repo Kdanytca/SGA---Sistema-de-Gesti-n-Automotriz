@@ -64,11 +64,9 @@ const userRoutes = loadRoute(require('./routes/userRoutes'));
 const ownerRoutes = loadRoute(require('./routes/ownerRoutes'));
 const auditRoutes = loadRoute(require('./routes/auditRoutes'));
 const authControllerModule = require('./controllers/authController');
-const documentController = require('./controllers/documentController');
 const validateModule = require('./middleware/validate');
 const authMiddlewareModule = require('./middleware/auth');
 const authSchemasModule = require('./schemas/authSchemas');
-const upload = require('./config/multer');
 const authController = authControllerModule.default || authControllerModule;
 const validate = validateModule.default || validateModule;
 const authMiddleware = authMiddlewareModule.default || authMiddlewareModule;
@@ -93,11 +91,15 @@ app.post('/api/auth/register', validate(authSchemas.registerSchema), authControl
 app.post('/api/auth/login', validate(authSchemas.loginSchema), authController.login);
 app.get('/api/auth/profile', authMiddleware.auth, authController.getProfile);
 
-app.post('/api/documents/upload', authMiddleware.auth, upload.single('archivo'), documentController.upload);
-app.get('/api/documents/maintenance/:maintenanceId', authMiddleware.auth, documentController.getByMaintenance);
-app.get('/api/documents/view/:id', authMiddleware.auth, documentController.view);
-app.get('/api/documents/download/:id', authMiddleware.auth, documentController.download);
-app.delete('/api/documents/:id', authMiddleware.auth, documentController.delete);
+app.use('/api/documents', (req, res, next) => {
+    const route = loadRoute(require('./routes/documentRoutes'));
+    if (typeof route === 'function') {
+        return route(req, res, next);
+    }
+
+    console.warn('Ruta /api/documents omitida: handler inválido');
+    next();
+});
 
 const registerRoute = (prefix, route) => {
     if (typeof route === 'function') {
