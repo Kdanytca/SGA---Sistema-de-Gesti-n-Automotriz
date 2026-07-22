@@ -39,13 +39,14 @@ require('./models/Owner');
 
 
 // Importar rutas
-const authRoutes = require('./routes/authRoutes');
-const vehicleRoutes = require('./routes/vehicleRoutes');
-const maintenanceRoutes = require('./routes/maintenanceRoutes');
-const documentRoutes = require('./routes/documentRoutes');
-const userRoutes = require('./routes/userRoutes');
-const ownerRoutes = require('./routes/ownerRoutes');
-const auditRoutes = require('./routes/auditRoutes');
+const loadRoute = (route) => route.default || route;
+const authRoutes = loadRoute(require('./routes/authRoutes'));
+const vehicleRoutes = loadRoute(require('./routes/vehicleRoutes'));
+const maintenanceRoutes = loadRoute(require('./routes/maintenanceRoutes'));
+const documentRoutes = loadRoute(require('./routes/documentRoutes'));
+const userRoutes = loadRoute(require('./routes/userRoutes'));
+const ownerRoutes = loadRoute(require('./routes/ownerRoutes'));
+const auditRoutes = loadRoute(require('./routes/auditRoutes'));
 
 const app = express();
 const PORT = process.env.PORT || 5000;
