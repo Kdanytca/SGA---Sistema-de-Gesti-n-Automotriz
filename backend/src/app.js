@@ -39,14 +39,23 @@ require('./models/Owner');
 
 
 // Importar rutas
-const loadRoute = (route) => {
-    let loadedRoute = route;
+const loadRoute = (route, seen = new Set()) => {
+    if (!route || seen.has(route)) return route;
+    if (typeof route === 'function') return route;
 
-    while (loadedRoute && typeof loadedRoute !== 'function' && loadedRoute.default) {
-        loadedRoute = loadedRoute.default;
+    seen.add(route);
+
+    if (route.default) {
+        const defaultRoute = loadRoute(route.default, seen);
+        if (typeof defaultRoute === 'function') return defaultRoute;
     }
 
-    return loadedRoute;
+    for (const value of Object.values(route)) {
+        const foundRoute = loadRoute(value, seen);
+        if (typeof foundRoute === 'function') return foundRoute;
+    }
+
+    return route;
 };
 const authRoutes = loadRoute(require('./routes/authRoutes'));
 const vehicleRoutes = loadRoute(require('./routes/vehicleRoutes'));
@@ -85,18 +94,25 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
-// Sincronizar base de datos
-sequelize.sync({ alter: true })
-    .then(async () => {
-        console.log('Base de datos sincronizada');
-        await seedDefaultUsers();
-        console.log('Usuarios demo verificados');
-        app.listen(PORT, () => {
-            console.log(`Servidor corriendo en http://localhost:${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.error('Error al sincronizar la base de datos:', error);
+const startServer = () => {
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
+};
+
+if (process.env.ENABLE_DB_SYNC === 'true') {
+    sequelize.sync({ alter: true })
+        .then(async () => {
+            console.log('Base de datos sincronizada');
+            await seedDefaultUsers();
+            console.log('Usuarios demo verificados');
+            startServer();
+        })
+        .catch((error) => {
+            console.error('Error al sincronizar la base de datos:', error);
+        });
+} else {
+    startServer();
+}
 
 module.exports = app;
