@@ -1,7 +1,9 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/sequelize');
+const sequelizeConfig = require('../config/sequelize');
 const Maintenance = require('./Maintenance');
 const User = require('./User');
+
+const sequelize = sequelizeConfig.define ? sequelizeConfig : sequelizeConfig.default;
 
 const Document = sequelize.define('Document', {
     id: {
