@@ -60,14 +60,15 @@ const loadRoute = (route, seen = new Set()) => {
 const authRoutes = loadRoute(require('./routes/authRoutes'));
 const vehicleRoutes = loadRoute(require('./routes/vehicleRoutes'));
 const maintenanceRoutes = loadRoute(require('./routes/maintenanceRoutes'));
-const documentRoutes = loadRoute(require('./routes/documentRoutes'));
 const userRoutes = loadRoute(require('./routes/userRoutes'));
 const ownerRoutes = loadRoute(require('./routes/ownerRoutes'));
 const auditRoutes = loadRoute(require('./routes/auditRoutes'));
 const authControllerModule = require('./controllers/authController');
+const documentController = require('./controllers/documentController');
 const validateModule = require('./middleware/validate');
 const authMiddlewareModule = require('./middleware/auth');
 const authSchemasModule = require('./schemas/authSchemas');
+const upload = require('./config/multer');
 const authController = authControllerModule.default || authControllerModule;
 const validate = validateModule.default || validateModule;
 const authMiddleware = authMiddlewareModule.default || authMiddlewareModule;
@@ -92,6 +93,12 @@ app.post('/api/auth/register', validate(authSchemas.registerSchema), authControl
 app.post('/api/auth/login', validate(authSchemas.loginSchema), authController.login);
 app.get('/api/auth/profile', authMiddleware.auth, authController.getProfile);
 
+app.post('/api/documents/upload', authMiddleware.auth, upload.single('archivo'), documentController.upload);
+app.get('/api/documents/maintenance/:maintenanceId', authMiddleware.auth, documentController.getByMaintenance);
+app.get('/api/documents/view/:id', authMiddleware.auth, documentController.view);
+app.get('/api/documents/download/:id', authMiddleware.auth, documentController.download);
+app.delete('/api/documents/:id', authMiddleware.auth, documentController.delete);
+
 const registerRoute = (prefix, route) => {
     if (typeof route === 'function') {
         app.use(prefix, route);
@@ -103,7 +110,6 @@ const registerRoute = (prefix, route) => {
 registerRoute('/api/auth', authRoutes);
 registerRoute('/api/vehicles', vehicleRoutes);
 registerRoute('/api/maintenances', maintenanceRoutes);
-registerRoute('/api/documents', documentRoutes);
 registerRoute('/api/usuarios', userRoutes);
 registerRoute('/api/owners', ownerRoutes);
 registerRoute('/api/audit', auditRoutes);
