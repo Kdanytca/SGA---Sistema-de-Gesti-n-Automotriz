@@ -176,7 +176,8 @@ const handleLogin = async () => {
     await authStore.login(email.value, password.value, remember.value);
     router.push(authStore.isAdmin ? "/usuarios" : "/vehicles");
   } catch (err) {
-    const errorMsg = err.response?.data?.error || "Credenciales inválidas";
+    const backendError = err.response?.data?.error;
+    const errorMsg = typeof backendError === "string" ? backendError : "Error al iniciar sesión";
 
     if (errorMsg.includes("deshabilitado") || errorMsg.includes("inactivo")) {
       error.value = "❌ Usuario deshabilitado. Contacta al administrador.";
