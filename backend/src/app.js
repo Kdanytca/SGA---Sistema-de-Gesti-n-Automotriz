@@ -2,10 +2,30 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-const sequelizeConfig = require('./config/sequelize');
-const seedDefaultUsers = require('./seeders/defaultUsers');
+const { Sequelize } = require('sequelize');
 
-const sequelize = sequelizeConfig.sync ? sequelizeConfig : sequelizeConfig.default;
+dotenv.config();
+
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.STORAGE_URL;
+const sequelize = global.__sgaSequelize || (databaseUrl
+    ? new Sequelize(databaseUrl, {
+        dialect: 'postgres',
+        logging: false,
+        dialectOptions: process.env.NODE_ENV === 'production' ? {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false,
+            },
+        } : {},
+    })
+    : new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+        host: process.env.DB_HOST,
+        dialect: 'postgres',
+        logging: false,
+    }));
+
+global.__sgaSequelize = sequelize;
+const seedDefaultUsers = require('./seeders/defaultUsers');
 
 // Importar modelos
 require('./models/User');
@@ -23,10 +43,6 @@ const documentRoutes = require('./routes/documentRoutes');
 const userRoutes = require('./routes/userRoutes');
 const ownerRoutes = require('./routes/ownerRoutes');
 const auditRoutes = require('./routes/auditRoutes');
-
-
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
